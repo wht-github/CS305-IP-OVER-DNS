@@ -7,3 +7,12 @@ Running script on client and server. The choice of proxy or NAT is yours.
 ## Features
 -  use timer to control whether send packet to the server, improve efficient
 -  base64 encode provide a bad security, however, a ssh tunnel can solve it.
+
+## Testing
+
+![](README.assets/1b3e2e971b955cbb77471df4527b36bb.png)
+
+
+
+![](README.assets/479ff4b200009bfa252c36971f0aa17b.png)
+
