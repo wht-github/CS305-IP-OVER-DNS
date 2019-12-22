@@ -16,7 +16,11 @@ local_addr = '10.9.0.2'
 local_mask = '255.255.255.0'
 mtu = 180
 server_port = 53
-
+'''
+Working Flow(server):
+the same as client.
+DIFF: packet ip into dns response and send it back
+'''
 
 class server_tun:
     def __init__(self):
