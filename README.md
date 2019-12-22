@@ -1,7 +1,7 @@
 # CS305IP-Over-DNS
 This project is a trail just use DNS packet transmitting data between client and server.
 ## Main Principle
-It use the authority DNS name server, local DNS will forward the query to corrosponding name server with subdomain. So client can encode data into QNAME to send data percisely. And the local DNS will recurisively query the authority DNS, so the data can be encoded in TXT fields in RR as well.
+It use the authority DNS name server, local DNS will forward the query to corrosponding name server with subdomain. So client can encode data into QNAME to send data percisely. And the local DNS will recurisively query the authority DNS, so the data can be encoded in TXT fields in RR as well.  
 read ip packet from tun and pack it as dns packet
 write ip packet decode form dns response into tun
 ## Usage
