@@ -36,6 +36,7 @@ class server_tun:
         self.ip_queue = Queue(65532)
 
     def _recv_from_socket(self):
+#         use stack to store the recieved dns packet
         data, addr = self._socket.recvfrom(65523)
         query_msg = dns.message.from_wire(data)
         name = str(query_msg.question[0].name)
@@ -71,6 +72,8 @@ class server_tun:
                 self._tun.write(data_to_tun)
                 data_to_tun = ''
             if self._socket in w and not self.data_queue.empty():
+#                 get the newest recieved dns packet, prevent dns time out
+#                   encode ip data into TXT field
                 query_msg, target_addr = self.data_queue.get()
                 response = dns.message.make_response(
                     query_msg, recursion_available=True)
