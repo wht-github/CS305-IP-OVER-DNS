@@ -14,7 +14,7 @@ from queue import Queue
 from queue import LifoQueue
 local_addr = '10.9.0.2'
 local_mask = '255.255.255.0'
-mtu = 180
+mtu = 160
 server_port = 53
 '''
 Working Flow(server):
@@ -22,12 +22,14 @@ the same as client.
 DIFF: packet ip into dns response and send it back
 '''
 
+
 class server_tun:
     def __init__(self):
         '''
         IFF_NO_PI: no flag in discrete packet
         '''
-        self._tun = pytun.TunTapDevice(name='mytun', flags=pytun.IFF_TUN| pytun.IFF_NO_PI)
+        self._tun = pytun.TunTapDevice(
+            name='mytun', flags=pytun.IFF_TUN | pytun.IFF_NO_PI)
 
         self._tun.addr = local_addr
         self._tun.netmask = local_mask
@@ -40,7 +42,7 @@ class server_tun:
         self.ip_queue = Queue(65532)
 
     def _recv_from_socket(self):
-#         use stack to store the recieved dns packet
+        # use stack to store the recieved dns packet
         data, addr = self._socket.recvfrom(65523)
         query_msg = dns.message.from_wire(data)
         name = str(query_msg.question[0].name)
@@ -76,8 +78,8 @@ class server_tun:
                 self._tun.write(data_to_tun)
                 data_to_tun = ''
             if self._socket in w and not self.data_queue.empty():
-#                 get the newest recieved dns packet, prevent dns time out
-#                   encode ip data into TXT field
+                # get the newest recieved dns packet, prevent dns time out
+                # encode ip data into TXT field
                 query_msg, target_addr = self.data_queue.get()
                 response = dns.message.make_response(
                     query_msg, recursion_available=True)
