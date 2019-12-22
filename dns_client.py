@@ -22,7 +22,12 @@ mtu = 160
 query_root_name = 'group-24.cs305.fun'
 label_len = 63
 
+'''
+Working Flow(client):
+1. build local tun
+2. send query to dns server timely to keep data transmit 
 
+'''
 class client_tun:
     def __init__(self):
         self._tun = pytun.TunTapDevice(
@@ -46,10 +51,12 @@ class client_tun:
         last_blank = time.time()
         while True:
             # print(1)
+#           read write excute, wait for available
             r, w, x = select.select(r, w, x)
             if self._tun in r:
                 data_to_socket = self._tun.read(mtu)
             if self._socket in r:
+#                 decode the ip packet, write it into kernel
                 data_to_tun, target_addr = self._socket.recvfrom(65532)
                 dns_response = dns.message.from_wire(data_to_tun)
                 if dns_response.answer:
@@ -62,6 +69,7 @@ class client_tun:
                 self._tun.write(data_to_tun)
                 data_to_tun = b''
             if self._socket in w:
+#                 encoding local ip packet into qname 
                 encoded_data_to_socket = coder.b64encode(data_to_socket)
                 split_labels = [str(encoded_data_to_socket[i:i + label_len], encoding='ascii')
                                 for i in range(0, len(encoded_data_to_socket), label_len)]
@@ -83,6 +91,7 @@ class client_tun:
                 r.append(self._tun)
             now = time.time()
             print(now - last_blank)
+#             prevent the client send packet too fast
             if now - last_blank > self.speed or data_to_socket:
                 print(data_to_socket)
                 w.append(self._socket)
