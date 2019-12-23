@@ -11,15 +11,7 @@ import dns.resolver
 import base64 as coder
 import time
 import queue
-local_addr = '10.9.0.1'
-dst_addr = '10.9.0.2'
-local_mask = '255.255.255.0'
-# remote_dns_addr = '120.78.166.34'
-remote_dns_addr = '52.82.46.4'
-remote_dns_port = 53
-mtu = 160
-query_root_name = 'group-24.cs305.fun'
-label_len = 63
+from configparser import ConfigParser
 
 '''
 Working Flow(client):
@@ -30,15 +22,21 @@ Working Flow(client):
 
 
 class client_tun:
-    def __init__(self):
+    def __init__(self, config):
         self._tun = pytun.TunTapDevice(
             name='mytun', flags=pytun.IFF_TUN | pytun.IFF_NO_PI)
-        self._tun.addr = local_addr
-        self._tun.dstaddr = dst_addr
-        self._tun.netmask = local_mask
-        self._tun.mtu = mtu
+        # TUN Config
+        self._tun.addr = config.get('client', 'local_address')
+        self._tun.dstaddr = config.get('client', 'dst_address')
+        self._tun.netmask = config.get('client', 'local_mask')
+        self._tun.mtu = config.getint('client', 'mtu')
         self._tun.persist(True)
         self._tun.up()
+        # Remote DNS Config
+        self.remote_dns_addr = config.get('client', 'remote_dns_addr')
+        self.remote_dns_port = config.getint('client', 'remote_dns_port')
+        self.query_root_name = config.get('client', 'query_root_name')
+        self.label_len = config.getint('client', 63)
         self.speed = 0.5
         self._socket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
 
@@ -71,14 +69,14 @@ class client_tun:
             if self._socket in w:
                 # encoding local ip packet into qname
                 encoded_data_to_socket = coder.b64encode(data_to_socket)
-                split_labels = [str(encoded_data_to_socket[i:i + label_len], encoding='ascii')
-                                for i in range(0, len(encoded_data_to_socket), label_len)]
-                split_labels.append(query_root_name)
+                split_labels = [str(encoded_data_to_socket[i:i + self.label_len], encoding='ascii')
+                                for i in range(0, len(encoded_data_to_socket), self.label_len)]
+                split_labels.append(self.query_root_name)
                 target_domain = '.'.join(split_labels)
                 name = dns.name.from_text(target_domain)
                 query = dns.message.make_query(name, 'TXT')
                 self._socket.sendto(
-                    query.to_wire(), (remote_dns_addr, remote_dns_port))
+                    query.to_wire(), (self.remote_dns_addr, self.remote_dns_port))
                 data_to_socket = b''
 
             r = []
@@ -99,5 +97,7 @@ class client_tun:
 
 
 if __name__ == '__main__':
-    server = client_tun()
+    config = ConfigParser()
+    config.read('config.ini')
+    server = client_tun(config=config)
     server.run()

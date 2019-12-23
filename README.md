@@ -48,18 +48,18 @@ Run the dns_client.py script in privileged mode
 
    ``` bash
    # set socks proxy
-   $ export http_proxy = socks5://10.9.0.1:8080
-   $ export https_proxy = socks5://10.9.0.1:8080
+   export http_proxy = socks5://10.9.0.1:8080
+   export https_proxy = socks5://10.9.0.1:8080
    # or
-   $ export ALL_PROXY = socks5://10.9.0.1:8080
+   export ALL_PROXY = socks5://10.9.0.1:8080
    ```
 
     Cancel proxy settings
 
    ```bash
-    $ unset http_proxy
-    $ unset https_proxy
-    $ unset ALL_RPOXY
+    unset http_proxy
+    unset https_proxy
+    unset ALL_RPOXY
    ```
 
    Now the programs run in the terminal will use the proxy automatically

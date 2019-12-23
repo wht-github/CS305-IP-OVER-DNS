@@ -16,6 +16,7 @@ local_addr = '10.9.0.2'
 local_mask = '255.255.255.0'
 mtu = 160
 server_port = 53
+
 '''
 Working Flow(server):
 the same as client.
