@@ -12,10 +12,7 @@ import base64 as coder
 import dns.rrset
 from queue import Queue
 from queue import LifoQueue
-local_addr = '10.9.0.2'
-local_mask = '255.255.255.0'
-mtu = 160
-server_port = 53
+from configparser import ConfigParser
 
 '''
 Working Flow(server):
@@ -31,16 +28,28 @@ class server_tun:
         '''
         self._tun = pytun.TunTapDevice(
             name='mytun', flags=pytun.IFF_TUN | pytun.IFF_NO_PI)
-
-        self._tun.addr = local_addr
-        self._tun.netmask = local_mask
-        self._tun.mtu = mtu
+        
+        self.read_config()
         self._tun.persist(True)
         self._tun.up()
         self._socket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
         self._socket.bind(('', 53))
         self.data_queue = LifoQueue(65532)
-        self.ip_queue = Queue(65532)
+
+    def read_config(self):
+        try:
+            config = ConfigParser()
+            config.read('config.ini')
+        except:
+            print('Missing File Config.ini')
+            sys.exit()
+        try:
+            self._tun.addr = config.get('server','local_address')
+            self._tun.netmask = config.get('server','local_mask')
+            self._tun.mtu = config.get('server', 'mtu')
+        except:
+            print('Missing config arg')
+            sys.exit()
 
     def _recv_from_socket(self):
         # use stack to store the recieved dns packet

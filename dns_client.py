@@ -36,6 +36,10 @@ class client_tun:
         try:
             config = ConfigParser()
             config.read('config.ini')
+        except:
+            print('Missing File Config.ini')
+            sys.exit()
+        try:
             # TUN Config
             self._tun.addr = config.get('client', 'local_address')
             self._tun.dstaddr = config.get('client', 'dst_address')
@@ -47,8 +51,7 @@ class client_tun:
             self.query_root_name = config.get('client', 'query_root_name')
             self.label_len = config.getint('client', 'label_len')
         except:
-            print('Read Config Failed!')
-            print('Shutdown Program')
+            print('Missing config arg')
             sys.exit()
 
     def run(self):
@@ -99,10 +102,8 @@ class client_tun:
             if not data_to_socket:
                 r.append(self._tun)
             now = time.time()
-            print(now - last_blank)
             # prevent the client send packet too fast
             if now - last_blank > self.speed or data_to_socket:
-                print(data_to_socket)
                 w.append(self._socket)
                 last_blank = now
 
