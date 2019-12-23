@@ -30,6 +30,7 @@ class client_tun:
         self._socket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
         self._tun.persist(True)
         self._tun.up()
+        print('Clinet TUN Config Successful')
 
     # Read Config File
     def read_config(self):
@@ -62,6 +63,7 @@ class client_tun:
         data_to_tun = b''
         data_to_socket = b''
         last_blank = time.time()
+        print('Client TUN is Now Running')
         while True:
             # read write excute, wait for available
             r, w, x = select.select(r, w, x)

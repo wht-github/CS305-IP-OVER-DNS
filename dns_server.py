@@ -35,6 +35,7 @@ class server_tun:
         self._socket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
         self._socket.bind(('', 53))
         self.data_queue = LifoQueue(65532)
+        print('Server TUN Config Successful')
 
     def read_config(self):
         try:
@@ -46,7 +47,7 @@ class server_tun:
         try:
             self._tun.addr = config.get('server','local_address')
             self._tun.netmask = config.get('server','local_mask')
-            self._tun.mtu = config.get('server', 'mtu')
+            self._tun.mtu = config.getint('server', 'mtu')
         except:
             print('Missing config arg')
             sys.exit()
@@ -65,7 +66,6 @@ class server_tun:
         return data_to_tun
 
     def run(self):
-
         mtu = self._tun.mtu
         r = [self._tun, self._socket]
         w = []
@@ -74,13 +74,14 @@ class server_tun:
         data_to_socket = ''
         target_addr = ()
         query_msg = None
+        print('Server TUN is Now Running')
 
         while True:
             # print(1)
             r, w, x = select.select(r, w, x)
             if self._tun in r:
                 data_to_socket = self._tun.read(mtu)
-                print(data_to_socket)
+                # print(data_to_socket)
             if self._socket in r:
                 data_to_tun = self._recv_from_socket()
                 # print(data_to_tun)
