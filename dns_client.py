@@ -16,29 +16,40 @@ from configparser import ConfigParser
 '''
 Working Flow(client):
 1. build local tun
-2. send query to dns server timely to keep data transmit 
+2. send query to dns server timely to keep data transmit
 
 '''
 
 
 class client_tun:
-    def __init__(self, config):
+    def __init__(self):
         self._tun = pytun.TunTapDevice(
             name='mytun', flags=pytun.IFF_TUN | pytun.IFF_NO_PI)
-        # TUN Config
-        self._tun.addr = config.get('client', 'local_address')
-        self._tun.dstaddr = config.get('client', 'dst_address')
-        self._tun.netmask = config.get('client', 'local_mask')
-        self._tun.mtu = config.getint('client', 'mtu')
-        self._tun.persist(True)
-        self._tun.up()
-        # Remote DNS Config
-        self.remote_dns_addr = config.get('client', 'remote_dns_addr')
-        self.remote_dns_port = config.getint('client', 'remote_dns_port')
-        self.query_root_name = config.get('client', 'query_root_name')
-        self.label_len = config.getint('client', 63)
+        self.read_config()
         self.speed = 0.5
         self._socket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+        self._tun.persist(True)
+        self._tun.up()
+
+    # Read Config File
+    def read_config(self):
+        try:
+            config = ConfigParser()
+            config.read('config.ini')
+            # TUN Config
+            self._tun.addr = config.get('client', 'local_address')
+            self._tun.dstaddr = config.get('client', 'dst_address')
+            self._tun.netmask = config.get('client', 'local_mask')
+            self._tun.mtu = config.getint('client', 'mtu')
+            # Remote DNS Config
+            self.remote_dns_addr = config.get('client', 'remote_dns_addr')
+            self.remote_dns_port = config.getint('client', 'remote_dns_port')
+            self.query_root_name = config.get('client', 'query_root_name')
+            self.label_len = config.getint('client', 'label_len')
+        except:
+            print('Read Config Failed!')
+            print('Shutdown Program')
+            sys.exit()
 
     def run(self):
         mtu = self._tun.mtu
@@ -97,7 +108,5 @@ class client_tun:
 
 
 if __name__ == '__main__':
-    config = ConfigParser()
-    config.read('config.ini')
-    server = client_tun(config=config)
+    server = client_tun()
     server.run()
